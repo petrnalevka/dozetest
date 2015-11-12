@@ -5,7 +5,7 @@ Android just became a new category of documentation "semi-documented", you have 
 Here is one of them https://plus.google.com/109720416927515295704/posts/Vph4KjPZ4LN.
 +Dianne Hackborn posted about foreground services being able to gather sensor data during doze when holding a partial wake lock.
 
-This project is a minimal implementation of that case which doe snot work on does at least on Build MRA58N, Nexus 5.
+This project is a minimal implementation of that case which does not work at least on Build MRA58N, Nexus 5.
 
 I did run the test over night and below are the data. 
 
