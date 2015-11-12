@@ -22,4 +22,3 @@ DOZE.INFO: [04:59:22.820, main]: Data 21.719559
 DOZE.INFO: [05:08:22.848, main]: Dat a 7.2907867
 .. gap .. until 8:20
 
-To come up with an implementation quickly I used our internal logging class which does in-memory logging and sending logs, but I will get rid of this dependency.﻿
