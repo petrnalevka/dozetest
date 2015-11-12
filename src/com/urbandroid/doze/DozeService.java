@@ -12,17 +12,21 @@ import android.hardware.SensorManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
-import com.urbandroid.common.error.DefaultConfigurationBuilder;
-import com.urbandroid.common.error.ErrorReporter;
-import com.urbandroid.common.error.ErrorReporterConfiguration;
-import com.urbandroid.common.logging.Logger;
+import android.util.Log;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class DozeService extends Service  implements SensorEventListener {
+
+    public static final String TAG = "DOZETEST";
 
     private static final int NOTIFICATION_ID = 42;
 
     private float[] last = new float[3];
     private float total = -1;
+
+    private List<Data> data;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -34,7 +38,7 @@ public class DozeService extends Service  implements SensorEventListener {
     private Runnable logger = new Runnable() {
         @Override
         public void run() {
-            Logger.logInfo("Data " + total);
+            data.add(new Data(System.currentTimeMillis(), total));
             total = 0;
             Handler h = new Handler();
             h.postDelayed(this, 60000);
@@ -45,10 +49,7 @@ public class DozeService extends Service  implements SensorEventListener {
     public void onCreate() {
         super.onCreate();
 
-        Logger.initialize(this, "DOZE", 200, Logger.DEBUG_LEVEL, Logger.INFO_LEVEL);
-
-        ErrorReporterConfiguration configuration = new DefaultConfigurationBuilder.Builder(this, new Handler(), "Doze", new String[] {"petr.nalevka@gmail.com"}).withLockupDatection(false).build();
-        ErrorReporter.initialize(this, configuration);
+        data = new ArrayList<Data>();
 
         Intent stopIntent = new Intent(this, MainActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(this, NOTIFICATION_ID, stopIntent, 0);
@@ -80,6 +81,20 @@ public class DozeService extends Service  implements SensorEventListener {
     @Override
     public void onDestroy() {
         super.onDestroy();
+
+        StringBuilder sb = new StringBuilder();
+        for (Data entry : data){
+            sb.append(entry.toString()).append("\n");
+            Log.i(TAG, entry.toString());
+        }
+
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_EMAIL, "petr.nalevka@gmail.com");
+        intent.putExtra(Intent.EXTRA_SUBJECT, "Doze Test Data");
+        intent.putExtra(Intent.EXTRA_TEXT, sb.toString());
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(Intent.createChooser(intent, "Send test results").setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
 
         if (lock != null && lock.isHeld()) {
             lock.release();
